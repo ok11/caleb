@@ -99,3 +99,11 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# development/testing databases
+db/
+app/db/
+tests/db/
+
+# pycharm files
+.idea/

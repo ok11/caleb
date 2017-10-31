@@ -1,0 +1,40 @@
+[[source]]
+
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+
+[packages]
+
+flask = "*"
+flask-babel = "*"
+babel = "*"
+flask-login = "*"
+flask-principal = "*"
+"iso-639" = "*"
+"pypdf2" = "*"
+pytz = "*"
+requests = "*"
+sqlalchemy = "*"
+tornado = "*"
+wand = "*"
+unidecode = "*"
+flask-wtf = "*"
+alembic = "*"
+flask-sqlalchemy = "*"
+flask-migrate = "*"
+flask-script = "*"
+
+
+[dev-packages]
+
+nose = "*"
+testtools = "*"
+coverage = "*"
+factory-boy = "*"
+
+
+[requires]
+
+python_version = "3.6"
