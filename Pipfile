@@ -25,6 +25,7 @@ alembic = "*"
 flask-sqlalchemy = "*"
 flask-migrate = "*"
 flask-script = "*"
+flask-marshmallow = "*"
 
 
 [dev-packages]

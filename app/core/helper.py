@@ -5,7 +5,7 @@ from flask.json import JSONEncoder
 def generate_id():
     return str(uuid.uuid1())
 
-class DataEncoder(JSONEncoder):
+class DTOEncoder(JSONEncoder):
     def default(self, obj):
         if hasattr(obj, "to_dict"):
             return obj.to_dict()
@@ -26,3 +26,4 @@ class DataEncoder(JSONEncoder):
             return d
         else:
             return super().default(obj)
+

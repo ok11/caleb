@@ -102,13 +102,49 @@ class BookFactory(factory.alchemy.SQLAlchemyModelFactory):
     path = factory.Faker('file_path', depth=2)
     has_cover = factory.Faker('boolean')
 
-    authors = factory.SubFactory(AuthorFactory)
-    tags = factory.SubFactory(TagFactory)
-    languages = factory.SubFactory(LanguageFactory)
+    # authors = factory.SubFactory(AuthorFactory)
+    # tags = factory.SubFactory(TagFactory)
+    # languages = factory.SubFactory(LanguageFactory)
 
 #    identifiers = factory.RelatedFactory(IdentifierFactory)
 #    comments = factory.RelatedFactory(CommentFactory)
 #    data = factory.RelatedFactory(DataFactory)
+
+    @factory.post_generation
+    def authors(self, create, extracted, **kwargs):
+        if not create:
+            return
+        if extracted:
+            for author in extracted:
+                self.authors.append(author)
+
+
+    @factory.post_generation
+    def languages(self, create, extracted, **kwargs):
+        if not create:
+            return
+        if extracted:
+            for language in extracted:
+                self.languages.append(language)
+
+
+    @factory.post_generation
+    def tags(self, create, extracted, **kwargs):
+        if not create:
+            return
+        if extracted:
+            for tag in extracted:
+                self.tags.append(tag)
+
+
+# class BookAuthorsLinkFactory(factory.alchemy.SQLAlchemyModelFactory):
+#     class Meta:
+#         model = db.Table
+#         sqlalchemy_session = db.session
+#         sqlalchemy_session_persistence = 'commit'
+#
+#     book = None
+#     author = None
 
 class CommentFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:

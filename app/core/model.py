@@ -1,15 +1,9 @@
 import json
-from app.database import db
+from app.data import db
 
 class BaseModel(db.Model):
 
     __abstract__ = True
-
-    def to_dict(self):
-        return __dict__
-
-    def to_json(self):
-        return json.dumps(self.to_dict())
 
     def save(self):
         db.session.add(self)
@@ -59,11 +53,11 @@ class Identifier(BaseModel):
     val = db.Column(db.String)
     book = db.Column(db.Integer, db.ForeignKey('books.id'))
 
-    def __init__(self, val, id_type, book):
-        self.val = val
-        self.type = id_type
-        self.book = book
-
+    # def __init__(self, val, id_type, book):
+    #     self.val = val
+    #     self.type = id_type
+    #     self.book = book
+    #
     def formatType(self):
         if self.type == "amazon":
             return u"Amazon"
@@ -111,9 +105,9 @@ class Comment(BaseModel):
     text = db.Column(db.String)
     book = db.Column(db.Integer, db.ForeignKey('books.id'))
 
-    def __init__(self, text, book):
-        self.text = text
-        self.book = book
+    # def __init__(self, text, book):
+    #     self.text = text
+    #     self.book = book
 
     def __repr__(self):
         return u"<Comment({0})>".format(self.text)
@@ -126,8 +120,8 @@ class Tag(BaseModel):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String)
 
-    def __init__(self, name):
-        self.name = name
+    # def __init__(self, name):
+    #     self.name = name
 
     def __repr__(self):
         return u"<Tag('{0})>".format(self.name)
@@ -142,10 +136,10 @@ class Author(BaseModel):
     sort = db.Column(db.String)
     link = db.Column(db.String)
 
-    def __init__(self, name, sort, link):
-        self.name = name
-        self.sort = sort
-        self.link = link
+    # def __init__(self, name, sort, link):
+    #     self.name = name
+    #     self.sort = sort
+    #     self.link = link
 
     def __repr__(self):
         return u"<Author('{0},{1}{2}')>".format(self.name, self.sort, self.link)
@@ -159,9 +153,9 @@ class Series(BaseModel):
     name = db.Column(db.String)
     sort = db.Column(db.String)
 
-    def __init__(self, name, sort):
-        self.name = name
-        self.sort = sort
+    # def __init__(self, name, sort):
+    #     self.name = name
+    #     self.sort = sort
 
     def __repr__(self):
         return u"<Series('{0},{1}')>".format(self.name, self.sort)
@@ -174,8 +168,8 @@ class Rating(BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     rating = db.Column(db.Integer)
 
-    def __init__(self, rating):
-        self.rating = rating
+    # def __init__(self, rating):
+    #     self.rating = rating
 
     def __repr__(self):
         return u"<Rating('{0}')>".format(self.rating)
@@ -187,9 +181,9 @@ class Language(BaseModel):
 
     id = db.Column(db.Integer, primary_key=True)
     lang_code = db.Column(db.String)
-
-    def __init__(self, lang_code):
-        self.lang_code = lang_code
+    #
+    # def __init__(self, lang_code):
+    #     self.lang_code = lang_code
 
     def __repr__(self):
         return u"<Language('{0}')>".format(self.lang_code)
@@ -203,9 +197,9 @@ class Publisher(BaseModel):
     name = db.Column(db.String)
     sort = db.Column(db.String)
 
-    def __init__(self, name, sort):
-        self.name = name
-        self.sort = sort
+    # def __init__(self, name, sort):
+    #     self.name = name
+    #     self.sort = sort
 
     def __repr__(self):
         return u"<Publisher('{0},{1}')>".format(self.name, self.sort)
@@ -222,11 +216,11 @@ class Data(BaseModel):
     uncompressed_size = db.Column(db.Integer)
     name = db.Column(db.String)
 
-    def __init__(self, book, book_format, uncompressed_size, name):
-        self.book = book
-        self.format = book_format
-        self.uncompressed_size = uncompressed_size
-        self.name = name
+    # def __init__(self, book, book_format, uncompressed_size, name):
+    #     self.book = book
+    #     self.format = book_format
+    #     self.uncompressed_size = uncompressed_size
+    #     self.name = name
 
     def __repr__(self):
         return u"<Data('{0},{1}{2}{3}')>".format(self.book, self.format, self.uncompressed_size, self.name)
@@ -260,17 +254,30 @@ class Book(BaseModel):
     publishers = db.relationship('Publisher', secondary=books_publishers_link, backref='books')
     identifiers = db.relationship('Identifier', backref='books')
 
-    def __init__(self, title, sort, author_sort, timestamp, pubdate, series_index,
-                 last_modified, path, has_cover, authors, tags, languages = None):
-        self.title = title
-        self.sort = sort
-        self.author_sort = author_sort
-        self.timestamp = timestamp
-        self.pubdate = pubdate
-        self.series_index = series_index
-        self.last_modified = last_modified
-        self.path = path
-        self.has_cover = has_cover
+    def __init__(self, **kwargs):
+#        , authors, tags,
+#                 languages = None, last_modified=None, timestamp=None):
+        self.title = kwargs.get('title')
+        self.sort = kwargs.get('sort', '')
+        self.author_sort = kwargs.get('author_sort', '')
+        self.timestamp = kwargs.get('timestamp', '')
+        self.pubdate = kwargs.get('pubdate', '')
+        self.series_index = kwargs.get('series_index', '0')
+#        self.last_modified = last_modified
+        self.path = kwargs.get('path')
+        self.has_cover = kwargs.get('has_cover', 0)
+
+        # self.authors = []
+        # for author in authors:
+        #     self.authors.append(Author(**author))
+        #
+        # self.tags = []
+        # for tag in tags:
+        #     self.tags.append(Tag(**tag))
+        #
+        # self.languages = []
+        # for language in languages:
+        #     self.languages.append(Language(**language))
 
     def __repr__(self):
         return u"<Books('{0},{1}{2}{3}{4}{5}{6}{7}{8}')>".format(

@@ -2,25 +2,26 @@ from faker import Faker
 from testtools import TestCase
 from testtools.matchers import Equals
 
-from tests.factories import *
-
 from app import db, create_app
+from tests.core.factories import *
+
 
 class BaseTest(TestCase):
 
     def setUp(self):
-        super(BaseTest, self).setUp()
+        super().setUp()
+        self.fake = Faker()
         self.app = create_app('testing')
         self.app_context = self.app.app_context()
         self.app_context.push()
-        self.fake = Faker()
         db.create_all()
 
     def tearDown(self):
-        super(BaseTest, self).tearDown()
+        super().tearDown()
         db.session.remove()
         db.drop_all()
         self.app_context.pop()
+
 
 
 class TestBooks(BaseTest):
@@ -38,7 +39,11 @@ class TestBooks(BaseTest):
 
     def test_create_book_increases_books_count(self):
         count = len(Book.query.all())
-        BookFactory.create()
+        BookFactory.create(
+            authors=(
+                AuthorFactory.create(), AuthorFactory.create()
+            )
+        )
         self.assertThat(len(Book.query.all()), Equals(count + 1))
 
     def test_delete_book_decreases_books_count(self):

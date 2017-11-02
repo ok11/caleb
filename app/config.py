@@ -11,13 +11,13 @@ class Config(object):
 
 class DevelopmentConfig(Config):
     """Configurations for Development."""
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///app/db/dev.db'
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///../app/db/dev.db'
     DEBUG = True
 
 class TestingConfig(Config):
     """Configurations for Testing, with a separate test database."""
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:' # 'sqlite:///../tests/db/test.db' #
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:' #'sqlite:///../tests/db/test.db' #
     DEBUG = True
 
     logging.basicConfig()
