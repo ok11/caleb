@@ -73,7 +73,7 @@ class AuthorFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     name = factory.Faker('name')
     sort = name
-    link = factory.Faker('uri')
+    link = factory.Faker('url')
 
 
 class SeriesFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -102,14 +102,6 @@ class BookFactory(factory.alchemy.SQLAlchemyModelFactory):
     path = factory.Faker('file_path', depth=2)
     has_cover = factory.Faker('boolean')
 
-    # authors = factory.SubFactory(AuthorFactory)
-    # tags = factory.SubFactory(TagFactory)
-    # languages = factory.SubFactory(LanguageFactory)
-
-#    identifiers = factory.RelatedFactory(IdentifierFactory)
-#    comments = factory.RelatedFactory(CommentFactory)
-#    data = factory.RelatedFactory(DataFactory)
-
     @factory.post_generation
     def authors(self, create, extracted, **kwargs):
         if not create:
@@ -137,15 +129,6 @@ class BookFactory(factory.alchemy.SQLAlchemyModelFactory):
                 self.tags.append(tag)
 
 
-# class BookAuthorsLinkFactory(factory.alchemy.SQLAlchemyModelFactory):
-#     class Meta:
-#         model = db.Table
-#         sqlalchemy_session = db.session
-#         sqlalchemy_session_persistence = 'commit'
-#
-#     book = None
-#     author = None
-
 class CommentFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = Comment
@@ -168,6 +151,7 @@ class IdentifierFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     book = factory.SubFactory(BookFactory)
 
+
 class DataFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = Data
@@ -176,7 +160,7 @@ class DataFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     format = factory.Faker('ebook_format')
     uncompressed_size = factory.Faker('pyint')
-    name = factory.Faker('name') # TODO
+    name = factory.Faker('name')
 
     book = factory.SubFactory(BookFactory)
 

@@ -1,5 +1,10 @@
-import json
+from datetime import datetime
 from app.data import db
+
+
+def ts():
+    return datetime.utcnow().isoformat(' ')
+
 
 class BaseModel(db.Model):
 
@@ -142,7 +147,7 @@ class Author(BaseModel):
     #     self.link = link
 
     def __repr__(self):
-        return u"<Author('{0},{1}{2}')>".format(self.name, self.sort, self.link)
+        return u"<Author('{0},{1} {2}')>".format(self.name, self.sort, self.link)
 
 
 class Series(BaseModel):
@@ -158,7 +163,7 @@ class Series(BaseModel):
     #     self.sort = sort
 
     def __repr__(self):
-        return u"<Series('{0},{1}')>".format(self.name, self.sort)
+        return u"<Series('{0}, {1}')>".format(self.name, self.sort)
 
 
 class Rating(BaseModel):
@@ -202,7 +207,7 @@ class Publisher(BaseModel):
     #     self.sort = sort
 
     def __repr__(self):
-        return u"<Publisher('{0},{1}')>".format(self.name, self.sort)
+        return u"<Publisher('{0}, {1}')>".format(self.name, self.sort)
 
 
 
@@ -223,7 +228,7 @@ class Data(BaseModel):
     #     self.name = name
 
     def __repr__(self):
-        return u"<Data('{0},{1}{2}{3}')>".format(self.book, self.format, self.uncompressed_size, self.name)
+        return u"<Data('{0}, {1} {2} {3}')>".format(self.book, self.format, self.uncompressed_size, self.name)
 
 
 class Book(BaseModel):
@@ -236,10 +241,10 @@ class Book(BaseModel):
     title = db.Column(db.String)
     sort = db.Column(db.String)
     author_sort = db.Column(db.String)
-    timestamp = db.Column(db.String)
+    timestamp = db.Column(db.String, default=ts)
     pubdate = db.Column(db.String)
     series_index = db.Column(db.String)
-    last_modified = db.Column(db.String)
+    last_modified = db.Column(db.String, default=ts, onupdate=ts)
     path = db.Column(db.String)
     has_cover = db.Column(db.Integer)
     uuid = db.Column(db.String)
@@ -254,33 +259,18 @@ class Book(BaseModel):
     publishers = db.relationship('Publisher', secondary=books_publishers_link, backref='books')
     identifiers = db.relationship('Identifier', backref='books')
 
+
     def __init__(self, **kwargs):
-#        , authors, tags,
-#                 languages = None, last_modified=None, timestamp=None):
         self.title = kwargs.get('title')
         self.sort = kwargs.get('sort', '')
         self.author_sort = kwargs.get('author_sort', '')
-        self.timestamp = kwargs.get('timestamp', '')
         self.pubdate = kwargs.get('pubdate', '')
         self.series_index = kwargs.get('series_index', '0')
-#        self.last_modified = last_modified
         self.path = kwargs.get('path')
         self.has_cover = kwargs.get('has_cover', 0)
 
-        # self.authors = []
-        # for author in authors:
-        #     self.authors.append(Author(**author))
-        #
-        # self.tags = []
-        # for tag in tags:
-        #     self.tags.append(Tag(**tag))
-        #
-        # self.languages = []
-        # for language in languages:
-        #     self.languages.append(Language(**language))
-
     def __repr__(self):
-        return u"<Books('{0},{1}{2}{3}{4}{5}{6}{7}{8}')>".format(
+        return u"<Books('{0}, {1} {2} {3} {4} {5} {6} {7} {8}')>".format(
             self.title, self.sort, self.author_sort,
             self.timestamp, self.pubdate, self.series_index,
             self.last_modified, self.path, self.has_cover

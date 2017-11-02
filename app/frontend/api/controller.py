@@ -44,6 +44,8 @@ def create_book():
         response.headers['location'] = '/api/books/{}'.format(book.id)
         response.headers['content-type'] = 'application/json'
         return response
+    except ValidationError as e:
+        abort(http.HTTPStatus.BAD_REQUEST, e)
     except Exception as e:
         abort(http.HTTPStatus.INTERNAL_SERVER_ERROR, e)
 

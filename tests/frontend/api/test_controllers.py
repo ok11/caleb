@@ -9,14 +9,10 @@ from testtools.matchers import Contains
 from testtools.matchers import Not
 from testtools.matchers import Is
 
-#from tests.frontend.api.factories import *
-
-from app import create_app, db
-
-from app.core.model import Book
-
 from tests.core.factories import *
 from app.frontend.api.model import *
+
+from app import create_app, db
 
 book_schema = BookSchema()
 fake = Faker()
@@ -68,7 +64,7 @@ class BooksAPITest(TestCase):
                 "val": "12345678"
             }],
             "tags": [{
-                "val": "sf"
+                "name": "sf"
             }]
         }
         j = json.dumps(data)
@@ -102,7 +98,7 @@ class BooksAPITest(TestCase):
                 "val": "12345678"
             }],
             "tags": [{
-                "val": "sf"
+                "name": "sf"
             }]
         }
         j = json.dumps(data)
@@ -130,7 +126,7 @@ class BooksAPITest(TestCase):
                 "link": fake.url()
             }],
             "languages": [{
-                "name": "en" # fails
+                "name": "en" # SHOULD FAIL: lang_code -> name
             }],
             "identifiers": [{
                 "type": "google",
@@ -140,7 +136,7 @@ class BooksAPITest(TestCase):
                 "val": "12345678"
             }],
             "tags": [{
-                "val": "sf"
+                "name": "sf"
             }]
         }
         j = json.dumps(data)
@@ -149,6 +145,7 @@ class BooksAPITest(TestCase):
             content_type='application/json',
             data=j
         )
+
         self.assertThat(res.status_code, Equals(400))
 
     def test_books_query_returns_200(self):

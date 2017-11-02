@@ -1,4 +1,7 @@
-from marshmallow import fields, validates, validate, ValidationError
+from datetime import datetime
+from dateutil import tz
+
+from marshmallow import fields, validates, validate, ValidationError, post_dump, utils
 from app.data import ma
 
 class AuthorSchema(ma.Schema):
@@ -9,7 +12,7 @@ class AuthorSchema(ma.Schema):
     link = fields.Url(required=False)
     _links = ma.Hyperlinks({
         'self': ma.UrlFor('api.get_author', id='<id>')
-    })
+    }, dump_only=True)
 
 
 class PublisherSchema(ma.Schema):
@@ -19,7 +22,8 @@ class PublisherSchema(ma.Schema):
     id = fields.String(dump_only=True)
     _links = ma.Hyperlinks({
         'self': ma.UrlFor('api.get_publisher', id='<id>')
-    })
+    }, dump_only=True)
+
 
 class IdentifierSchema(ma.Schema):
     class Meta:
@@ -39,13 +43,15 @@ class TagSchema(ma.Schema):
         fields = ('id', 'name')
 
     id = fields.String(dump_only=True)
+    name = fields.String(required=True)
 
 
 class LanguageSchema(ma.Schema):
     class Meta:
         fields = ('id', 'lang_code')
 
-    id = fields.String(dump_only=True, validate=validate.Regexp('[a-z][a-z]'))
+    id = fields.String(dump_only=True)
+    lang_code = fields.String(required=True, validate=validate.Regexp('[a-z][a-z]'))
 
 
 class CommentSchema(ma.Schema):
@@ -55,7 +61,7 @@ class CommentSchema(ma.Schema):
     id = fields.String(dump_only=True)
     _links = ma.Hyperlinks({
         'self': ma.UrlFor('api.get_comment', id='<id>')
-    })
+    }, dump_only=True)
 
 
 class BookSchema(ma.Schema):
@@ -69,8 +75,8 @@ class BookSchema(ma.Schema):
 
     id = fields.String(dump_only=True)
     series_index = fields.Integer()
-    timestamp = fields.DateTime(dump_only=True)
-    last_modified = fields.DateTime(dump_only=True)
+    timestamp = fields.String(dump_only=True)
+    last_modified = fields.String(dump_only=True)
     authors = fields.Nested(AuthorSchema, only=('name', 'link'), many=True)
     languages = fields.Nested(LanguageSchema, many=True)
     tags = fields.Nested(TagSchema, only=('name'), many=True)
@@ -81,3 +87,9 @@ class BookSchema(ma.Schema):
     }, dump_only=True)
 
 
+    @post_dump()
+    def timestamps(self, data):
+        ts = datetime.utcnow().strptime(data['timestamp'], '%Y-%m-%d %H:%M:%S.%f')
+        data['timestamp'] = utils.isoformat(ts)
+        ts = datetime.utcnow().strptime(data['last_modified'], '%Y-%m-%d %H:%M:%S.%f')
+        data['last_modified'] = utils.isoformat(ts)
