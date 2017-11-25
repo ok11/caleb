@@ -1,32 +1,15 @@
-import random
 import factory
 
+from tests.helper import CalebProvider
 from app.core.model import *
 from app import db
+from faker import Faker
 
-from faker.providers import BaseProvider
+from datetime import datetime
 
-class CalebProvider(BaseProvider):
-    def lang_code(self):
-        lang_codes = ('en', 'ru', 'de')
-        return random.choice(lang_codes)
-
-    def ebook_id_type(self):
-        id_types = ('isbn', 'amazon')
-        return random.choice(id_types)
-
-    def ebook_id_value(self, **kwargs):
-        id_type = kwargs.get('ebook_id_type', 'isbn')
-        if id_type == 'isbn':
-            return factory.Faker('isbn13')
-        else:
-            return factory.Faker('isbn10')
-
-    def ebook_format(self):
-        ebook_formats = ('pdf', 'fb2', 'epub', 'mobi')
-        return random.choice(ebook_formats)
 
 factory.Faker.add_provider(CalebProvider)
+fake = Faker()
 
 class TagFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
@@ -95,10 +78,10 @@ class BookFactory(factory.alchemy.SQLAlchemyModelFactory):
     title = factory.Faker('sentence', nb_words=3)
     sort = title
     author_sort = factory.Faker('name')
-    timestamp = factory.Faker('iso8601')
+    timestamp = datetime.strftime(fake.date_time(), '%Y-%m-%d %H:%M:%S.%f')
     pubdate = factory.Faker('iso8601')
     series_index = factory.Faker('pyint')
-    last_modified = factory.Faker('iso8601')
+    last_modified = datetime.strftime(fake.date_time(), '%Y-%m-%d %H:%M:%S.%f')
     path = factory.Faker('file_path', depth=2)
     has_cover = factory.Faker('boolean')
 
@@ -127,6 +110,11 @@ class BookFactory(factory.alchemy.SQLAlchemyModelFactory):
         if extracted:
             for tag in extracted:
                 self.tags.append(tag)
+
+    # @factory.post_generation
+    # def timestamp(self, create, extracted, **kwargs):
+    #
+    #     self['timestamp'] = ts
 
 
 class CommentFactory(factory.alchemy.SQLAlchemyModelFactory):

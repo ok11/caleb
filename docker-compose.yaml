@@ -1,0 +1,21 @@
+version: '2'
+services:
+  app:
+    build:
+      context: .
+    environment:
+      APP_SETTINGS: production
+      DATABASE_URL: sqlite:////db/dev.db
+    ports:
+      - "8080:8080"
+#    depends_on:
+#      - migrations
+    volumes:
+      - /home/ok11/workspace/caleb/db/dev.db:/db/dev.db
+
+#  migrations:
+#    volumes:
+#      - ${PWD}/db/dev.db:/db/dev.db
+
+#volumes:
+#  - ${PWD}/db/dev.db:/db/dev.db

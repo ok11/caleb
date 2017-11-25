@@ -102,7 +102,7 @@ ENV/
 
 # development/testing databases
 db/
-app/db/
+db/
 tests/db/
 
 # pycharm files

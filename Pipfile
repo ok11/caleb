@@ -26,6 +26,7 @@ flask-sqlalchemy = "*"
 flask-migrate = "*"
 flask-script = "*"
 flask-marshmallow = "*"
+marshmallow-sqlalchemy = "*"
 
 
 [dev-packages]

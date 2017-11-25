@@ -1,9 +1,14 @@
 from datetime import datetime
 from app.data import db
-
+from sqlalchemy.ext.associationproxy import association_proxy
 
 def ts():
     return datetime.utcnow().isoformat(' ')
+
+
+class Dictable:
+    def to_dict(self):
+        return self.__dict__
 
 
 class BaseModel(db.Model):
@@ -49,20 +54,16 @@ books_publishers_link = db.Table('books_publishers_link', db.Model.metadata,
     db.Column('publisher', db.Integer, db.ForeignKey('publishers.id'), primary_key=True)
 )
 
-class Identifier(BaseModel):
+class BaseIdentifier(Dictable):
 
-    __tablename__ = 'identifiers'
+    def __init__(self, **kwargs):
+        self.id = kwargs.get('id', None)
+        self.val = kwargs.get('val')
+        self.type = kwargs.get('type')
 
-    id = db.Column(db.Integer, primary_key=True)
-    type = db.Column(db.String)
-    val = db.Column(db.String)
-    book = db.Column(db.Integer, db.ForeignKey('books.id'))
+        self.book = {}
 
-    # def __init__(self, val, id_type, book):
-    #     self.val = val
-    #     self.type = id_type
-    #     self.book = book
-    #
+
     def formatType(self):
         if self.type == "amazon":
             return u"Amazon"
@@ -80,6 +81,7 @@ class Identifier(BaseModel):
             return u"Ozon"
         else:
             return self.type
+
 
     def __repr__(self):
         if self.type == "amazon":
@@ -102,7 +104,30 @@ class Identifier(BaseModel):
             return u""
 
 
-class Comment(BaseModel):
+class Identifier(BaseModel, BaseIdentifier):
+
+    __tablename__ = 'identifiers'
+
+    id = db.Column(db.Integer, primary_key=True)
+    type = db.Column(db.String)
+    val = db.Column(db.String)
+
+    book = db.Column(db.Integer, db.ForeignKey('books.id'))
+
+
+class BaseComment(Dictable):
+
+    def __init__(self, **kwargs):
+        self.id = kwargs.get('id', None)
+        self.text = kwargs.get('text')
+
+        self.book = {}
+
+    def __repr__(self):
+        return u"<Comment({0})>".format(self.text)
+
+
+class Comment(BaseModel, BaseComment):
 
     __tablename__ = 'comments'
 
@@ -110,29 +135,38 @@ class Comment(BaseModel):
     text = db.Column(db.String)
     book = db.Column(db.Integer, db.ForeignKey('books.id'))
 
-    # def __init__(self, text, book):
-    #     self.text = text
-    #     self.book = book
+
+class BaseTag(Dictable):
+
+    def __init__(self, **kwargs):
+        self.id = kwargs.get('id', None)
+        self.name = kwargs.get('name')
 
     def __repr__(self):
-        return u"<Comment({0})>".format(self.text)
+        return u"<Tag('{0})>".format(self.name)
 
 
-class Tag(BaseModel):
+class Tag(BaseModel, BaseTag):
 
     __tablename__ = 'tags'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String)
 
-    # def __init__(self, name):
-    #     self.name = name
+
+class BaseAuthor(Dictable):
+
+    def __init__(self, **kwargs):
+        self.id = kwargs.get('id', None)
+        self.name = kwargs.get('name')
+        self.sort = kwargs.get('sort', self.name)
+        self.link = kwargs.get('link', '')
 
     def __repr__(self):
-        return u"<Tag('{0})>".format(self.name)
+        return u"<Author('{0},{1} {2}')>".format(self.name, self.sort, self.link)
 
 
-class Author(BaseModel):
+class Author(BaseModel, BaseAuthor):
 
     __tablename__ = 'authors'
 
@@ -141,16 +175,18 @@ class Author(BaseModel):
     sort = db.Column(db.String)
     link = db.Column(db.String)
 
-    # def __init__(self, name, sort, link):
-    #     self.name = name
-    #     self.sort = sort
-    #     self.link = link
+
+class BaseSeries(Dictable):
+
+    def __init__(self, **kwargs):
+        self.id = kwargs.get('id', None)
+        self.name = kwargs.get('name')
+        self.sort = kwargs.get('sort', self.name)
 
     def __repr__(self):
-        return u"<Author('{0},{1} {2}')>".format(self.name, self.sort, self.link)
+        return u"<Series('{0}, {1}')>".format(self.name, self.sort)
 
-
-class Series(BaseModel):
+class Series(BaseModel, BaseSeries):
 
     __tablename__ = 'series'
 
@@ -158,43 +194,55 @@ class Series(BaseModel):
     name = db.Column(db.String)
     sort = db.Column(db.String)
 
-    # def __init__(self, name, sort):
-    #     self.name = name
-    #     self.sort = sort
+
+class BaseRating(Dictable):
+
+    def __init__(self, **kwargs):
+        self.id = kwargs.get('id', None)
+        self.rating = kwargs.get('rating')
 
     def __repr__(self):
-        return u"<Series('{0}, {1}')>".format(self.name, self.sort)
+        return u"<Rating('{0}')>".format(self.rating)
 
 
-class Rating(BaseModel):
+class Rating(BaseModel, BaseRating):
 
     __tablename__ = 'ratings'
 
     id = db.Column(db.Integer, primary_key=True)
     rating = db.Column(db.Integer)
 
-    # def __init__(self, rating):
-    #     self.rating = rating
 
-    def __repr__(self):
-        return u"<Rating('{0}')>".format(self.rating)
+class BaseLanguage(Dictable):
 
-
-class Language(BaseModel):
-
-    __tablename__ = 'languages'
-
-    id = db.Column(db.Integer, primary_key=True)
-    lang_code = db.Column(db.String)
-    #
-    # def __init__(self, lang_code):
-    #     self.lang_code = lang_code
+    def __init__(self, **kwargs):
+        self.id = kwargs.get('id', None)
+        self.lang_code = kwargs.get('lang_code')
 
     def __repr__(self):
         return u"<Language('{0}')>".format(self.lang_code)
 
 
-class Publisher(BaseModel):
+class Language(BaseModel, BaseLanguage):
+
+    __tablename__ = 'languages'
+
+    id = db.Column(db.Integer, primary_key=True)
+    lang_code = db.Column(db.String)
+
+
+class BasePublisher(Dictable):
+
+    def __init__(self, **kwargs):
+        self.id = kwargs.get('id', None)
+        self.name = kwargs.get('name')
+        self.sort = kwargs.get('sort', self.name)
+
+    def __repr__(self):
+        return u"<Publisher('{0}, {1}')>".format(self.name, self.sort)
+
+
+class Publisher(BaseModel, BasePublisher):
 
     __tablename__ = 'publishers'
 
@@ -202,16 +250,24 @@ class Publisher(BaseModel):
     name = db.Column(db.String)
     sort = db.Column(db.String)
 
-    # def __init__(self, name, sort):
-    #     self.name = name
-    #     self.sort = sort
+
+class BaseData(Dictable):
+
+    def __init__(self, **kwargs):
+        self.id = kwargs.get('id', None)
+        self.format = kwargs.get('format')
+        self.uncompressed_size = kwargs.get('uncompressed_size')
+        self.name = kwargs.get('name')
+
+        self.book = {}
 
     def __repr__(self):
-        return u"<Publisher('{0}, {1}')>".format(self.name, self.sort)
+        return u"<Data('{0}, {1} {2} {3}')>".format(
+            self.book, self.format, self.uncompressed_size, self.name
+        )
 
 
-
-class Data(BaseModel):
+class Data(BaseModel, BaseData):
 
     __tablename__ = 'data'
 
@@ -221,21 +277,41 @@ class Data(BaseModel):
     uncompressed_size = db.Column(db.Integer)
     name = db.Column(db.String)
 
-    # def __init__(self, book, book_format, uncompressed_size, name):
-    #     self.book = book
-    #     self.format = book_format
-    #     self.uncompressed_size = uncompressed_size
-    #     self.name = name
 
-    def __repr__(self):
-        return u"<Data('{0}, {1} {2} {3}')>".format(self.book, self.format, self.uncompressed_size, self.name)
-
-
-class Book(BaseModel):
-
-    __tablename__ = 'books'
+class BaseBook(Dictable):
 
     DEFAULT_PUBDATE = "0101-01-01 00:00:00+00:00"
+
+    def __init__(self, **kwargs):
+        self.id = kwargs.get('id', None)
+        self.title = kwargs.get('title')
+        self.sort = kwargs.get('sort', '')
+        self.author_sort = kwargs.get('author_sort', '')
+        self.pubdate = kwargs.get('pubdate', BaseBook.DEFAULT_PUBDATE)
+        self.series_index = kwargs.get('series_index', '0')
+        self.path = kwargs.get('path')
+        self.has_cover = kwargs.get('has_cover', 0)
+        self.timestamp = kwargs.get('timestamp', None)
+        self.last_modified = kwargs.get('last_modified', None)
+
+        self.authors = []
+        self.tags = []
+        self.identifiers = []
+        self.ratings = []
+        self.languages = []
+        self.series = []
+
+    def __repr__(self):
+        return u"<Book ('{0} {1}, {2} {3} {4} {5} {6}')>".format(
+            self.title, self.sort, self.author_sort,
+            self.pubdate, self.series_index,
+            self.path, self.has_cover
+        )
+
+
+class Book(BaseModel, BaseBook):
+
+    __tablename__ = 'books'
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String)
@@ -251,31 +327,23 @@ class Book(BaseModel):
 
     authors = db.relationship('Author', secondary=books_authors_link, backref='books')
     tags = db.relationship('Tag', secondary=books_tags_link, backref='books')
-    comments = db.relationship('Comment', backref='books')
-    data = db.relationship('Data', backref='books')
     series = db.relationship('Series', secondary=books_series_link, backref='books')
     ratings = db.relationship('Rating', secondary=books_ratings_link, backref='books')
     languages = db.relationship('Language', secondary=books_languages_link, backref='books')
     publishers = db.relationship('Publisher', secondary=books_publishers_link, backref='books')
+
+    comments = db.relationship('Comment', backref='books')
+    data = db.relationship('Data', backref='books')
     identifiers = db.relationship('Identifier', backref='books')
 
-
-    def __init__(self, **kwargs):
-        self.title = kwargs.get('title')
-        self.sort = kwargs.get('sort', '')
-        self.author_sort = kwargs.get('author_sort', '')
-        self.pubdate = kwargs.get('pubdate', '')
-        self.series_index = kwargs.get('series_index', '0')
-        self.path = kwargs.get('path')
-        self.has_cover = kwargs.get('has_cover', 0)
-
-    def __repr__(self):
-        return u"<Books('{0}, {1} {2} {3} {4} {5} {6} {7} {8}')>".format(
-            self.title, self.sort, self.author_sort,
-            self.timestamp, self.pubdate, self.series_index,
-            self.last_modified, self.path, self.has_cover
-        )
-
+    # authors = association_proxy('_authors', 'name')
+    # tags = association_proxy('_tags', 'name', creator=lambda t: Tag(**t))
+    # languages = association_proxy('_languages', 'lang_code')
+    # series = association_proxy('_series', 'name')
+    # ratings = association_proxy('_ratings', 'rating')
+    # publishers = association_proxy('_publishers', 'name')
+    #
+    # identifiers = association_proxy('_identifiers', 'val')
 
 class Custom_Column(BaseModel):
 

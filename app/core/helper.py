@@ -1,18 +1,24 @@
 import uuid
 import inspect
-from flask.json import JSONEncoder
+import json
+import pickle
+
+from .model import Dictable
+
 
 def generate_id():
     return str(uuid.uuid1())
 
-class DTOEncoder(JSONEncoder):
+
+class DictableEncoder(json.JSONEncoder):
     def default(self, obj):
-        if hasattr(obj, "to_dict"):
+        if isinstance(obj, Dictable):
             return obj.to_dict()
+        elif isinstance(obj, (list, dict, str, int, float, bool, type(None))):
+            return json.JSONEncoder.default(self, obj)
         elif hasattr(obj, "__dict__"):
-            d = dict(
-                (key, value)
-                for key, value in inspect.getmembers(obj)
+            return dict(
+                (key, value) for key, value in inspect.getmembers(obj)
                 if not key.startswith("__")
                 and not inspect.isabstract(value)
                 and not inspect.isbuiltin(value)
@@ -23,7 +29,4 @@ class DTOEncoder(JSONEncoder):
                 and not inspect.ismethoddescriptor(value)
                 and not inspect.isroutine(value)
             )
-            return d
-        else:
-            return super().default(obj)
-
+        return json.JSONEncoder.default(self, obj)

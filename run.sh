@@ -1,4 +1,5 @@
 #!/bin/bash
 
-flask run
+python caleb db upgrade
+python caleb run
 

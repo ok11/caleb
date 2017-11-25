@@ -11,7 +11,7 @@ class Config(object):
 
 class DevelopmentConfig(Config):
     """Configurations for Development."""
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///../app/db/dev.db'
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///../db/dev.db'
     DEBUG = True
 
 class TestingConfig(Config):
@@ -22,6 +22,8 @@ class TestingConfig(Config):
 
     logging.basicConfig()
     logging.getLogger('sqlalchemy.engine').setLevel(logging.WARN)
+
+    SERVER_NAME ='localhost'
 
 class StagingConfig(Config):
     """Configurations for Staging."""
